@@ -108,3 +108,61 @@ describe("GET requests", () => {
     });
   });
 });
+describe("PATCH requests", () => {
+  describe("/api/articles/:article_id", () => {
+    it("responds with the updated article", () => {
+      const updateVotes = { inc_votes: 1 };
+      return request(app)
+        .patch("/api/articles/1")
+        .send(updateVotes)
+        .expect(200)
+        .then((response) => {
+          expect(response.body).toEqual({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: "2020-07-09T20:11:00.000Z",
+            votes: 101,
+          });
+        });
+    });
+    it("increments or decrements votes by the appropriate amount", () => {
+      const updateVotes = { inc_votes: -100 };
+      return request(app)
+        .patch("/api/articles/1")
+        .send(updateVotes)
+        .then((response) => {
+          expect(response.body.votes).toBe(0);
+        });
+    });
+    it("responds with '404 - article doesn't exist', when article doesn't exist", () => {
+      return request(app)
+        .patch("/api/articles/99")
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("article does not exist");
+        });
+    });
+    it("responds with '400 - bad request', when invalid article_id given", () => {
+      return request(app)
+        .patch("/api/articles/invalid-id")
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("bad request");
+        });
+    });
+    it("responds with '400 - bad request', when the request body is missing the required fields", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({})
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("bad request");
+        });
+    });
+  });
+});
