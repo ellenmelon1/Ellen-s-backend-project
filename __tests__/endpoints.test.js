@@ -86,4 +86,25 @@ describe("GET requests", () => {
         });
     });
   });
+  describe("/api/users", () => {
+    it("returns an array of objects of the expected length", () => {
+      return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then((response) => {
+          expect(response.body.users.length).toBe(4);
+        });
+    });
+    it("each returned object containins a 'username' property", () => {
+      return request(app)
+        .get("/api/users")
+        .then((response) => {
+          expect(
+            response.body.users.forEach((user) => {
+              expect(user).toHaveProperty("username");
+            })
+          );
+        });
+    });
+  });
 });
