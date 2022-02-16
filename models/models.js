@@ -24,7 +24,11 @@ exports.fetchUsers = () => {
 };
 
 exports.fetchAllArticles = () => {
-  return db.query("SELECT * FROM articles;").then((articles) => {
-    return articles.rows;
-  });
+  return db
+    .query(
+      "SELECT title,topic,author,created_at,votes,article_id FROM articles ORDER BY created_at DESC;"
+    )
+    .then((articles) => {
+      return articles.rows;
+    });
 };
