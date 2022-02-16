@@ -107,4 +107,34 @@ describe("GET requests", () => {
         });
     });
   });
+  describe("/api/articles", () => {
+    it("responds with an array of article objects of the correct length", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then((response) => {
+          expect(response.body.articles.length).toBe(12);
+        });
+    });
+    // it("each object contains the expected properties", () => {
+    //   return request(app)
+    //     .get("/api/articles")
+    //     .then((response) => {
+    //       expect(
+    //         response.body.articles.forEach((article) => {
+    //           expect(article).toEqual(
+    //             expect.objectContaining({
+    //               title: expect.any(String),
+    //               topic: expect.any(String),
+    //               author: expect.any(String),
+    //               body: expect.any(String),
+    //               created_at: expect.any(Number),
+    //               votes: expect.any(Number),
+    //             })
+    //           );
+    //         })
+    //       );
+    //     });
+    // });
+  });
 });

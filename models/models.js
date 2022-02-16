@@ -22,3 +22,9 @@ exports.fetchUsers = () => {
     return users.rows;
   });
 };
+
+exports.fetchAllArticles = () => {
+  return db.query("SELECT * FROM articles;").then((articles) => {
+    return articles.rows;
+  });
+};
