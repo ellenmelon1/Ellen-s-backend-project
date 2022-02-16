@@ -3,6 +3,7 @@ const {
   getTopics,
   getArticle,
   getUsers,
+  updateVotes,
 } = require("./controllers/controllers");
 const {
   handleCustomErrors,
@@ -16,6 +17,7 @@ app.use(express.json());
 app.get("/api/topics", getTopics);
 app.get("/api/articles/:article_id", getArticle);
 app.get("/api/users", getUsers);
+app.patch("/api/articles/:article_id", updateVotes);
 
 app.use(handleCustomErrors);
 app.use(handlePsqlErrors);
