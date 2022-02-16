@@ -66,7 +66,15 @@ describe("GET requests", () => {
             topic: "mitch",
             created_at: "2020-07-09T20:11:00.000Z",
             votes: 100,
+            comment_count: "11",
           });
+        });
+    });
+    it("the article response object includes a comment_count property, containing the total number of comments with the article_id", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .then(({ body }) => {
+          expect(body.article.comment_count).toBe("11");
         });
     });
     it("returns '400 - bad request' when invalid id given", () => {
