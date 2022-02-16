@@ -2,7 +2,11 @@ const {
   fetchTopics,
   fetchArticle,
   fetchUsers,
+
+  fetchAllArticles,
+
   patchArticleVotes,
+
 } = require("../models/models");
 
 exports.getTopics = (req, res, next) => {
@@ -32,11 +36,18 @@ exports.getUsers = (req, res, next) => {
     .catch(next);
 };
 
+
+exports.getAllArticles = (req, res, next) => {
+  fetchAllArticles()
+    .then((articles) => {
+      res.status(200).send({ articles });
+
 exports.updateVotes = (req, res, next) => {
   const { article_id } = req.params;
   patchArticleVotes(article_id, req.body)
     .then((article) => {
       res.status(200).send({ article });
+
     })
     .catch(next);
 };
