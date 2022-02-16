@@ -36,7 +36,7 @@ exports.updateVotes = (req, res, next) => {
   const { article_id } = req.params;
   patchArticleVotes(article_id, req.body)
     .then((article) => {
-      res.status(200).send(article);
+      res.status(200).send({ article });
     })
     .catch(next);
 };

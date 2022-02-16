@@ -117,7 +117,7 @@ describe("PATCH requests", () => {
         .send(updateVotes)
         .expect(200)
         .then((response) => {
-          expect(response.body).toEqual({
+          expect(response.body.article).toEqual({
             article_id: 1,
             title: "Living in the shadow of a great man",
             topic: "mitch",
@@ -134,7 +134,7 @@ describe("PATCH requests", () => {
         .patch("/api/articles/1")
         .send(updateVotes)
         .then((response) => {
-          expect(response.body.votes).toBe(0);
+          expect(response.body.article.votes).toBe(0);
         });
     });
     it("responds with '404 - article doesn't exist', when article doesn't exist", () => {
