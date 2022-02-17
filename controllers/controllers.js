@@ -2,11 +2,9 @@ const {
   fetchTopics,
   fetchArticle,
   fetchUsers,
-
   fetchAllArticles,
-
   patchArticleVotes,
-
+  fetchArticleComments,
 } = require("../models/models");
 
 exports.getTopics = (req, res, next) => {
@@ -36,18 +34,28 @@ exports.getUsers = (req, res, next) => {
     .catch(next);
 };
 
-
 exports.getAllArticles = (req, res, next) => {
-  fetchAllArticles()
-    .then((articles) => {
-      res.status(200).send({ articles });
+  fetchAllArticles().then((articles) => {
+    res.status(200).send({ articles });
+  });
+};
 
 exports.updateVotes = (req, res, next) => {
   const { article_id } = req.params;
   patchArticleVotes(article_id, req.body)
     .then((article) => {
       res.status(200).send({ article });
+    })
+    .catch(next);
+};
 
+exports.getArticleComments = (req, res, next) => {
+  const { article_id } = req.params;
+  fetchArticleComments(article_id)
+    .then((comments) => {
+      console.log("recieved in controller from model: ", comments);
+      console.log("sent from controller", { comments });
+      res.status(200).send({ comments });
     })
     .catch(next);
 };

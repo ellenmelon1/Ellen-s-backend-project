@@ -140,10 +140,55 @@ describe("GET requests", () => {
       return request(app)
         .get("/api/articles")
         .then((response) => {
-          console.log(response.body.articles);
           expect(response.body.articles).toBeSortedBy("created_at", {
             descending: true,
           });
+        });
+    });
+  });
+  describe("/api/articles/:article_id/comments", () => {
+    it("returns an array of the expected length", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then((response) => {
+          expect(response.body.comments).toHaveLength(11);
+        });
+    });
+    it("returned objects each contain the expected properties", () => {
+      const article_id = 1;
+      return request(app)
+        .get(`/api/articles/${article_id}/comments`)
+        .then((response) => {
+          expect(
+            response.body.comments.forEach((comment) => {
+              expect(comment).toEqual(
+                expect.objectContaining({
+                  comment_id: expect.any(Number),
+                  votes: expect.any(Number),
+                  created_at: expect.any(String),
+                  author: expect.any(String),
+                  body: expect.any(String),
+                })
+              );
+            })
+          );
+        });
+    });
+    it("returns 200 and an empty array when a valid article_id requested but no associated comments found", () => {
+      return request(app)
+        .get("/api/articles/4/comments")
+        .expect(200)
+        .then((response) => {
+          expect(response.body.comments).toHaveLength(0);
+        });
+    });
+    it(`responds\'404 - article does not exist\' when given a valid but non-existent id`, () => {
+      return request(app)
+        .get("/api/articles/99/comments")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("article does not exist");
         });
     });
   });
