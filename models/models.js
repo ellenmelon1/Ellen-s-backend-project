@@ -17,7 +17,6 @@ exports.fetchArticle = (article_id) => {
       [article_id]
     )
     .then((article) => {
-      console.log("inside the model:", article);
       if (article.rows.length === 0) {
         return Promise.reject({ status: 404, msg: "article does not exist" });
       }
@@ -67,7 +66,6 @@ exports.fetchArticleComments = (article_id) => {
     ),
     checkExists("articles", "article_id", article_id),
   ]).then((comments) => {
-    console.log("returned from the query in the model: ", comments);
     return comments[0].rows;
   });
 };

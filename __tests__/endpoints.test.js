@@ -58,16 +58,17 @@ describe("GET requests", () => {
       return request(app)
         .get(`/api/articles/${article_id}`)
         .then(({ body }) => {
-          expect(body.article).toEqual({
-            author: "butter_bridge",
-            title: "Living in the shadow of a great man",
-            article_id: 1,
-            body: "I find this existence challenging",
-            topic: "mitch",
-            created_at: "2020-07-09T20:11:00.000Z",
-            votes: 100,
-            comment_count: "11",
-          });
+          expect(body.article).toEqual(
+            expect.objectContaining({
+              author: "butter_bridge",
+              title: "Living in the shadow of a great man",
+              article_id: 1,
+              body: "I find this existence challenging",
+              topic: "mitch",
+              created_at: "2020-07-09T20:11:00.000Z",
+              votes: 100,
+            })
+          );
         });
     });
     it("the article response object includes a comment_count property, containing the total number of comments with the article_id", () => {
@@ -75,6 +76,14 @@ describe("GET requests", () => {
         .get("/api/articles/1")
         .then(({ body }) => {
           expect(body.article.comment_count).toBe("11");
+        });
+    });
+    it("comment_count property in the returned object is 0, when no comments are associated with the article", () => {
+      return request(app)
+        .get("/api/articles/2")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article.comment_count).toBe("0");
         });
     });
     it("returns '400 - bad request' when invalid id given", () => {
