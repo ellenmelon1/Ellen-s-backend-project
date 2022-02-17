@@ -33,7 +33,7 @@ exports.fetchUsers = () => {
 exports.fetchAllArticles = () => {
   return db
     .query(
-      "SELECT title,topic,author,created_at,votes,article_id FROM articles ORDER BY created_at DESC;"
+      "SELECT articles.title,articles.topic,articles.author,articles.created_at,articles.votes,articles.article_id, COUNT(comments.article_id) AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id GROUP BY articles.article_id ORDER BY created_at DESC;"
     )
     .then((articles) => {
       return articles.rows;
