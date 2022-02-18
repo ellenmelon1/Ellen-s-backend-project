@@ -154,7 +154,7 @@ describe("GET requests", () => {
           );
         });
     });
-    it("articles are sorted by date in descending order", () => {
+    it("articles are sorted by date in descending order as default", () => {
       return request(app)
         .get("/api/articles")
         .then((response) => {
@@ -164,7 +164,80 @@ describe("GET requests", () => {
         });
     });
 
+    it("articles can be sorted by a valid column, default descending order", () => {
+      return request(app)
+        .get("/api/articles?sort_by=votes")
+        .expect(200)
+        .then((response) => {
+          expect(response.body.articles).toBeSortedBy("votes", {
+            descending: true,
+          });
+        });
+    });
+    it("articles can be sorted by a valid column in ascending order if specified", () => {
+      return request(app)
+        .get("/api/articles?sort_by=topic&order=asc")
+        .expect(200)
+        .then((response) => {
+          expect(response.body.articles).toBeSortedBy("topic");
+        });
+    });
+    it("returns '400 - bad request' if sort_by query is invalid", () => {
+      return request(app)
+        .get("/api/articles?sort_by=invalidInput")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("bad request");
+        });
+    });
+    it("returns '400 - bad request' if order query is invalid", () => {
+      return request(app)
+        .get("/api/articles?sort_by=topic&order=invalidInput")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("bad request");
+        });
+    });
+    it("filters articles by the topic requested in the query", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch")
+        .expect(200)
+        .then((response) => {
+          expect(
+            response.body.articles.forEach((article) => {
+              expect(article).toEqual(
+                expect.objectContaining({
+                  topic: "mitch",
+                })
+              );
+            })
+          );
+        });
+    });
+    it("returns '404 - topic doesn't exist' when given an invalid topic query", () => {
+      return request(app)
+        .get("/api/articles?topic=invalidTopic")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("topic doesn't exist");
+        });
+    });
+  });
+  describe("/api/articles/:article_id/comments", () => {
+    it("returns an array of the expected length", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then((response) => {
+          expect(response.body.comments).toHaveLength(11);
+        });
+    });
+    it("returned objects each contain the expected properties", () => {
+      const article_id = 1;
+
+
     it("each article object in the array includes a comment_count property", () => {
+
       return request(app)
         .get("/api/articles")
         .then((response) => {
@@ -179,9 +252,39 @@ describe("GET requests", () => {
           );
         });
     });
+
+  });
+  it("returns 200 and an empty array when a valid article_id requested but no associated comments found", () => {
+    return request(app)
+      .get("/api/articles/4/comments")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.comments).toHaveLength(0);
+      });
+  });
+  it(`responds\'404 - article does not exist\' when given a valid but non-existent id`, () => {
+    return request(app)
+      .get("/api/articles/99/comments")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("article does not exist");
+      });
+  });
+});
+
+describe("PATCH requests", () => {
+  describe("/api/articles/:article_id", () => {
+    it("responds with the updated article", () => {
+      const updateVotes = { inc_votes: 1 };
+      return request(app)
+        .patch("/api/articles/1")
+        .send(updateVotes)
+        .expect(200)
+
     it("the returned comment_count property is correct for an article with multiple comments", () => {
       return request(app)
         .get("/api/articles")
+
         .then((response) => {
           expect(response.body.articles[0].comment_count).toBe("2");
         });
