@@ -35,9 +35,12 @@ exports.getUsers = (req, res, next) => {
 };
 
 exports.getAllArticles = (req, res, next) => {
-  fetchAllArticles().then((articles) => {
-    res.status(200).send({ articles });
-  });
+  const { sort_by, order, topic } = req.query;
+  fetchAllArticles(sort_by, order, topic)
+    .then((articles) => {
+      res.status(200).send({ articles });
+    })
+    .catch(next);
 };
 
 exports.updateVotes = (req, res, next) => {
