@@ -61,14 +61,15 @@ exports.patchArticleVotes = (article_id, votesToIncrementBy) => {
 exports.insertComment = (article_id, requestBody) => {
   const username = requestBody.username;
   const body = requestBody.body;
-  return db
-    .query(
+  return Promise.all([
+    db.query(
       "INSERT INTO comments (author,body,votes,article_id) VALUES($1,$2,$3,$4) RETURNING *;",
       [username, body, 0, article_id]
-    )
-    .then((comment) => {
-      return comment.rows[0];
-    });
+    ),
+    checkExists("articles", "article_id", article_id),
+  ]).then((comment) => {
+    return comment[0].rows[0];
+  });
 };
 
 exports.fetchArticleComments = (article_id) => {

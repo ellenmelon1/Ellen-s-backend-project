@@ -303,10 +303,10 @@ describe("POST requests", () => {
         expect(msg).toBe("bad request");
       });
   });
-  it("responds with '404 - article doesn't exist', when article doesn't exist", () => {
+  it("responds with '400 - article doesn't exist', when article doesn't exist", () => {
     return request(app)
-      .post("/api/articles/1/comments")
-      .send({ username: "ellenmelon", body: "comment here" })
+      .post("/api/articles/99/comments")
+      .send({ username: "butter_bridge", body: "comment here" })
       .expect(400)
       .then(({ body: { msg } }) => {
         expect(msg).toBe("bad request");
