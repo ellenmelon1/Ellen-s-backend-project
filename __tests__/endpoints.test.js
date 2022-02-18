@@ -301,3 +301,48 @@ describe("GET requests", () => {
     });
   });
 });
+describe("POST requests", () => {
+  it("adds a comment to the comments table with the correct article_id and returns it", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({ username: "butter_bridge", body: "coding is fun" })
+      .expect(201)
+      .then((response) => {
+        expect(response.body.comment).toEqual({
+          author: "butter_bridge",
+          body: "coding is fun",
+          votes: 0,
+          article_id: 1,
+          created_at: expect.any(String),
+          comment_id: 19,
+        });
+      });
+  });
+  it("returns '400 - bad request' when incomplete/empty body sent on request", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({ username: "butter_bridge" })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("bad request");
+      });
+  });
+  it("returns '400 - bad request' when invalid username sent on request", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({ username: "ellenmelon", body: "comment here" })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("bad request");
+      });
+  });
+  it("responds with '400 - article doesn't exist', when article doesn't exist", () => {
+    return request(app)
+      .post("/api/articles/99/comments")
+      .send({ username: "butter_bridge", body: "comment here" })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("bad request");
+      });
+  });
+});
