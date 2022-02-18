@@ -30,10 +30,20 @@ exports.fetchUsers = () => {
   });
 };
 
+
 exports.fetchAllArticles = (sort_by = "created_at", order = "desc", topic) => {
   if (
     !["title", "topic", "author", "created_at", "votes", "article_id"].includes(
       sort_by
+
+exports.fetchAllArticles = () => {
+  return db
+    .query(
+      `SELECT articles.title,articles.topic,articles.author,articles.created_at,articles.votes,articles.article_id, 
+      COUNT(comments.article_id) AS comment_count FROM articles
+      LEFT JOIN comments ON comments.article_id = articles.article_id GROUP BY articles.article_id 
+      ORDER BY created_at DESC;`
+
     )
   ) {
     return Promise.reject({ status: 400, msg: "bad request" });
@@ -77,6 +87,20 @@ exports.patchArticleVotes = (article_id, votesToIncrementBy) => {
       }
       return article.rows[0];
     });
+};
+
+exports.insertComment = (article_id, requestBody) => {
+  const username = requestBody.username;
+  const body = requestBody.body;
+  return Promise.all([
+    db.query(
+      "INSERT INTO comments (author,body,votes,article_id) VALUES($1,$2,$3,$4) RETURNING *;",
+      [username, body, 0, article_id]
+    ),
+    checkExists("articles", "article_id", article_id),
+  ]).then((comment) => {
+    return comment[0].rows[0];
+  });
 };
 
 exports.fetchArticleComments = (article_id) => {
