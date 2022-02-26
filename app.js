@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 const {
   getTopics,
   getArticle,
@@ -7,32 +7,33 @@ const {
   updateVotes,
   getArticleComments,
   postComment,
-} = require("./controllers/controllers");
+  deleteComment,
+} = require('./controllers/controllers');
 const {
   handleCustomErrors,
   handlePsqlErrors,
   handleServerErrors,
-} = require("./Errors/index");
+} = require('./Errors/index');
 
 const app = express();
 app.use(express.json());
 
-app.get("/api/topics", getTopics);
-app.get("/api/articles/:article_id", getArticle);
-app.get("/api/users", getUsers);
-app.get("/api/articles", getAllArticles);
-app.get("/api/articles/:article_id/comments", getArticleComments);
+app.get('/api/topics', getTopics);
+app.get('/api/articles/:article_id', getArticle);
+app.get('/api/users', getUsers);
+app.get('/api/articles', getAllArticles);
+app.get('/api/articles/:article_id/comments', getArticleComments);
 
-app.patch("/api/articles/:article_id", updateVotes);
-
-app.post("/api/articles/:article_id/comments", postComment);
+app.patch('/api/articles/:article_id', updateVotes);
+app.post('/api/articles/:article_id/comments', postComment);
+app.delete('/api/comments/:comment_id', deleteComment);
 
 app.use(handleCustomErrors);
 app.use(handlePsqlErrors);
 app.use(handleServerErrors);
 
-app.all("*", (req, res) => {
-  res.status(404).send({ msg: "path not found" });
+app.all('*', (req, res) => {
+  res.status(404).send({ msg: 'path not found' });
 });
 
 module.exports = app;
