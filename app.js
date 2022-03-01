@@ -8,6 +8,7 @@ const {
   getArticleComments,
   postComment,
   deleteComment,
+  getJSON,
 } = require('./controllers/controllers');
 const {
   handleCustomErrors,
@@ -18,6 +19,7 @@ const {
 const app = express();
 app.use(express.json());
 
+app.get('/api', getJSON);
 app.get('/api/topics', getTopics);
 app.get('/api/articles/:article_id', getArticle);
 app.get('/api/users', getUsers);

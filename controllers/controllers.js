@@ -8,6 +8,8 @@ const {
   insertComment,
   removeComment,
 } = require('../models/models');
+const fs = require('fs');
+const data = require('../endpoints.json');
 
 exports.getTopics = (req, res, next) => {
   fetchTopics()
@@ -76,4 +78,12 @@ exports.deleteComment = (req, res, next) => {
       res.sendStatus(204);
     })
     .catch(next);
+};
+
+exports.getJSON = (req, res) => {
+  fs.readFile('./endpoints.json', 'utf8', (err, data) => {
+    if (err) throw err;
+    const summary = JSON.parse(data);
+    res.status(200).send({ summary });
+  });
 };

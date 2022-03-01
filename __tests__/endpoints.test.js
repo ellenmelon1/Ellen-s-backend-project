@@ -11,14 +11,24 @@ afterAll(() => {
 });
 
 describe('GET requests', () => {
+  describe('/api', () => {
+    it('responds with a JSON describing all the available endpoints on the API', () => {
+      return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({ body: { summary } }) => {
+          expect(typeof summary).toBe('object');
+        });
+    });
+  });
   describe('/api/topics', () => {
     it('responds with an array of objects of the correct length', () => {
       return request(app)
         .get('/api/topics')
         .expect(200)
-        .then((response) => {
-          expect(response.body.topics).toHaveLength(3);
-          expect(Array.isArray(response.body.topics));
+        .then(({ body: { topics } }) => {
+          expect(topics).toHaveLength(3);
+          expect(Array.isArray(topics));
         });
     });
     it("each object in the returned array contains the properties 'slug' and 'description'", () => {
@@ -49,16 +59,16 @@ describe('GET requests', () => {
       return request(app)
         .get('/api/articles/1')
         .expect(200)
-        .then((response) => {
-          expect(typeof response.body.article).toBe('object');
+        .then(({ body: { article } }) => {
+          expect(typeof article).toBe('object');
         });
     });
     it('the returned object contains the correct properties', () => {
       const article_id = 1;
       return request(app)
         .get(`/api/articles/${article_id}`)
-        .then(({ body }) => {
-          expect(body.article).toEqual(
+        .then(({ body: { article } }) => {
+          expect(article).toEqual(
             expect.objectContaining({
               author: 'butter_bridge',
               title: 'Living in the shadow of a great man',
@@ -108,16 +118,16 @@ describe('GET requests', () => {
       return request(app)
         .get('/api/users')
         .expect(200)
-        .then((response) => {
-          expect(response.body.users.length).toBe(4);
+        .then(({ body }) => {
+          expect(body.users.length).toBe(4);
         });
     });
     it("each returned object containins a 'username' property", () => {
       return request(app)
         .get('/api/users')
-        .then((response) => {
+        .then(({ body: { users } }) => {
           expect(
-            response.body.users.forEach((user) => {
+            users.forEach((user) => {
               expect(user).toHaveProperty('username');
             })
           );
@@ -130,16 +140,16 @@ describe('GET requests', () => {
       return request(app)
         .get('/api/articles')
         .expect(200)
-        .then((response) => {
-          expect(response.body.articles.length).toBe(12);
+        .then(({ body: { articles } }) => {
+          expect(articles.length).toBe(12);
         });
     });
     it('each object contains the expected properties', () => {
       return request(app)
         .get('/api/articles')
-        .then((response) => {
+        .then(({ body: { articles } }) => {
           expect(
-            response.body.articles.forEach((article) => {
+            articles.forEach((article) => {
               expect(article).toEqual(
                 expect.objectContaining({
                   title: expect.any(String),
@@ -157,8 +167,8 @@ describe('GET requests', () => {
     it('articles are sorted by date in descending order', () => {
       return request(app)
         .get('/api/articles')
-        .then((response) => {
-          expect(response.body.articles).toBeSortedBy('created_at', {
+        .then(({ body: { articles } }) => {
+          expect(articles).toBeSortedBy('created_at', {
             descending: true,
           });
         });
@@ -167,9 +177,9 @@ describe('GET requests', () => {
     it('each article object in the array includes a comment_count property', () => {
       return request(app)
         .get('/api/articles')
-        .then((response) => {
+        .then(({ body: { articles } }) => {
           expect(
-            response.body.articles.forEach((article) => {
+            articles.forEach((article) => {
               expect(article).toEqual(
                 expect.objectContaining({
                   comment_count: expect.any(String),
@@ -182,188 +192,193 @@ describe('GET requests', () => {
     it('the returned comment_count property is correct for an article with multiple comments', () => {
       return request(app)
         .get('/api/articles')
-        .then((response) => {
-          expect(response.body.articles[0].comment_count).toBe('2');
+        .then(({ body: { articles } }) => {
+          expect(articles[0].comment_count).toBe('2');
         });
     });
     it('the value of comment_count is 0 for an article with no comments', () => {
       return request(app)
         .get('/api/articles')
-        .then((response) => {
-          expect(response.body.articles[2].comment_count).toBe('0');
+        .then(({ body: { articles } }) => {
+          expect(articles[2].comment_count).toBe('0');
         });
-    });
-
-    describe('/api/articles/:article_id/comments', () => {
-      it('returns an array of the expected length', () => {
-        return request(app)
-          .get('/api/articles/1/comments')
-          .expect(200)
-          .then((response) => {
-            expect(response.body.comments).toHaveLength(11);
-          });
-      });
-      it('returned objects each contain the expected properties', () => {
-        const article_id = 1;
-        return request(app)
-          .get(`/api/articles/${article_id}/comments`)
-          .then((response) => {
-            expect(
-              response.body.comments.forEach((comment) => {
-                expect(comment).toEqual(
-                  expect.objectContaining({
-                    comment_id: expect.any(Number),
-                    votes: expect.any(Number),
-                    created_at: expect.any(String),
-                    author: expect.any(String),
-                    body: expect.any(String),
-                  })
-                );
-              })
-            );
-          });
-      });
-      it('returns 200 and an empty array when a valid article_id requested but no associated comments found', () => {
-        return request(app)
-          .get('/api/articles/4/comments')
-          .expect(200)
-          .then((response) => {
-            expect(response.body.comments).toHaveLength(0);
-          });
-      });
-      it(`responds\'404 - not found\' when given a valid but non-existent id`, () => {
-        return request(app)
-          .get('/api/articles/99/comments')
-          .expect(404)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe('not found');
-          });
-      });
     });
   });
 
-  describe('PATCH requests', () => {
-    describe('/api/articles/:article_id', () => {
-      it('responds with the updated article', () => {
-        const updateVotes = { inc_votes: 1 };
-        return request(app)
-          .patch('/api/articles/1')
-          .send(updateVotes)
-          .expect(200)
-          .then((response) => {
-            expect(response.body.article).toEqual({
-              article_id: 1,
-              title: 'Living in the shadow of a great man',
-              topic: 'mitch',
-              author: 'butter_bridge',
-              body: 'I find this existence challenging',
-              created_at: '2020-07-09T20:11:00.000Z',
-              votes: 101,
-            });
-          });
-      });
-      it('increments or decrements votes by the appropriate amount', () => {
-        const updateVotes = { inc_votes: -100 };
-        return request(app)
-          .patch('/api/articles/1')
-          .send(updateVotes)
-          .then((response) => {
-            expect(response.body.article.votes).toBe(0);
-          });
-      });
-      it("responds with '404 - article doesn't exist', when article doesn't exist", () => {
-        return request(app)
-          .patch('/api/articles/99')
-          .send({ inc_votes: 1 })
-          .expect(404)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe('article does not exist');
-          });
-      });
-      it("responds with '400 - bad request', when invalid article_id given", () => {
-        return request(app)
-          .patch('/api/articles/invalid-id')
-          .send({ inc_votes: 1 })
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe('bad request');
-          });
-      });
-      it("responds with '400 - bad request', when the request body is missing the required fields", () => {
-        return request(app)
-          .patch('/api/articles/1')
-          .send({})
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe('bad request');
-          });
-      });
+  describe('/api/articles/:article_id/comments', () => {
+    it('returns an array of the expected length', () => {
+      return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).toHaveLength(11);
+        });
+    });
+    it('returned objects each contain the expected properties', () => {
+      const article_id = 1;
+      return request(app)
+        .get(`/api/articles/${article_id}/comments`)
+        .then(({ body: { comments } }) => {
+          expect(
+            comments.forEach((comment) => {
+              expect(comment).toEqual(
+                expect.objectContaining({
+                  comment_id: expect.any(Number),
+                  votes: expect.any(Number),
+                  created_at: expect.any(String),
+                  author: expect.any(String),
+                  body: expect.any(String),
+                })
+              );
+            })
+          );
+        });
+    });
+    it('returns 200 and an empty array when a valid article_id requested but no associated comments found', () => {
+      return request(app)
+        .get('/api/articles/4/comments')
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments).toHaveLength(0);
+        });
+    });
+    it(`responds\'404 - not found\' when given a valid but non-existent id`, () => {
+      return request(app)
+        .get('/api/articles/99/comments')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('not found');
+        });
     });
   });
 });
-describe('POST requests', () => {
-  it('adds a comment to the comments table with the correct article_id and returns it', () => {
-    return request(app)
-      .post('/api/articles/1/comments')
-      .send({ username: 'butter_bridge', body: 'coding is fun' })
-      .expect(201)
-      .then((response) => {
-        expect(response.body.comment).toEqual({
-          author: 'butter_bridge',
-          body: 'coding is fun',
-          votes: 0,
-          article_id: 1,
-          created_at: expect.any(String),
-          comment_id: 19,
+
+describe('PATCH requests', () => {
+  describe('/api/articles/:article_id', () => {
+    it('responds with the updated article', () => {
+      const updateVotes = { inc_votes: 1 };
+      return request(app)
+        .patch('/api/articles/1')
+        .send(updateVotes)
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article).toEqual({
+            article_id: 1,
+            title: 'Living in the shadow of a great man',
+            topic: 'mitch',
+            author: 'butter_bridge',
+            body: 'I find this existence challenging',
+            created_at: '2020-07-09T20:11:00.000Z',
+            votes: 101,
+          });
         });
-      });
+    });
+    it('increments or decrements votes by the appropriate amount', () => {
+      const updateVotes = { inc_votes: -100 };
+      return request(app)
+        .patch('/api/articles/1')
+        .send(updateVotes)
+        .then(({ body }) => {
+          expect(body.article.votes).toBe(0);
+        });
+    });
+    it("responds with '404 - article doesn't exist', when article doesn't exist", () => {
+      return request(app)
+        .patch('/api/articles/99')
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('article does not exist');
+        });
+    });
+    it("responds with '400 - bad request', when invalid article_id given", () => {
+      return request(app)
+        .patch('/api/articles/invalid-id')
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('bad request');
+        });
+    });
+    it("responds with '400 - bad request', when the request body is missing the required fields", () => {
+      return request(app)
+        .patch('/api/articles/1')
+        .send({})
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('bad request');
+        });
+    });
   });
-  it("returns '400 - bad request' when incomplete/empty body sent on request", () => {
-    return request(app)
-      .post('/api/articles/1/comments')
-      .send({ username: 'butter_bridge' })
-      .expect(400)
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe('bad request');
-      });
-  });
-  it("returns '400 - bad request' when invalid username sent on request", () => {
-    return request(app)
-      .post('/api/articles/1/comments')
-      .send({ username: 'ellenmelon', body: 'comment here' })
-      .expect(400)
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe('bad request');
-      });
-  });
-  it("responds with '400 - article doesn't exist', when article doesn't exist", () => {
-    return request(app)
-      .post('/api/articles/99/comments')
-      .send({ username: 'butter_bridge', body: 'comment here' })
-      .expect(400)
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe('bad request');
-      });
+});
+
+describe('POST requests', () => {
+  describe('/api/articles/:article_id/comments', () => {
+    it('adds a comment to the comments table with the correct article_id and returns it', () => {
+      return request(app)
+        .post('/api/articles/1/comments')
+        .send({ username: 'butter_bridge', body: 'coding is fun' })
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.comment).toEqual({
+            author: 'butter_bridge',
+            body: 'coding is fun',
+            votes: 0,
+            article_id: 1,
+            created_at: expect.any(String),
+            comment_id: 19,
+          });
+        });
+    });
+    it("returns '400 - bad request' when incomplete/empty body sent on request", () => {
+      return request(app)
+        .post('/api/articles/1/comments')
+        .send({ username: 'butter_bridge' })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('bad request');
+        });
+    });
+    it("returns '400 - bad request' when invalid username sent on request", () => {
+      return request(app)
+        .post('/api/articles/1/comments')
+        .send({ username: 'ellenmelon', body: 'comment here' })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('bad request');
+        });
+    });
+    it("responds with '400 - article doesn't exist', when article doesn't exist", () => {
+      return request(app)
+        .post('/api/articles/99/comments')
+        .send({ username: 'butter_bridge', body: 'comment here' })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('bad request');
+        });
+    });
   });
 });
 describe('DELETE requests', () => {
-  it("deletes the specified comment and returns 'status 204'", () => {
-    return request(app).delete('/api/comments/1').expect(204);
-  });
-  it("responds with '404 - not found' when comment_id doesn't exist", () => {
-    return request(app)
-      .delete('/api/comments/999')
-      .expect(404)
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe('not found');
-      });
-  });
-  it("responds with '400 - bad request' when a comment_id with an invalid format is requested", () => {
-    return request(app)
-      .delete('/api/comments/invalidCommentFormat')
-      .expect(400)
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe('bad request');
-      });
+  describe('/api/comments/comment_id', () => {
+    it("deletes the specified comment and returns 'status 204'", () => {
+      return request(app).delete('/api/comments/1').expect(204);
+    });
+    it("responds with '404 - not found' when comment_id doesn't exist", () => {
+      return request(app)
+        .delete('/api/comments/999')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('not found');
+        });
+    });
+    it("responds with '400 - bad request' when a comment_id with an invalid format is requested", () => {
+      return request(app)
+        .delete('/api/comments/invalidCommentFormat')
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('bad request');
+        });
+    });
   });
 });
