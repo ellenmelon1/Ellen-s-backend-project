@@ -164,7 +164,7 @@ describe('GET requests', () => {
           );
         });
     });
-    it('articles are sorted by date in descending order', () => {
+    it('articles are sorted by date in descending order as default', () => {
       return request(app)
         .get('/api/articles')
         .then(({ body: { articles } }) => {
@@ -174,33 +174,67 @@ describe('GET requests', () => {
         });
     });
 
-    it('each article object in the array includes a comment_count property', () => {
+    it('articles can be sorted by a valid column, default descending order', () => {
       return request(app)
-        .get('/api/articles')
-        .then(({ body: { articles } }) => {
+        .get('/api/articles?sort_by=votes')
+        .expect(200)
+        .then((response) => {
+          expect(response.body.articles).toBeSortedBy('votes', {
+            descending: true,
+          });
+        });
+    });
+
+    it('articles can be sorted by a valid column in ascending order if specified', () => {
+      return request(app)
+        .get('/api/articles?sort_by=topic&order=asc')
+        .expect(200)
+        .then((response) => {
+          expect(response.body.articles).toBeSortedBy('topic');
+        });
+    });
+
+    it("returns '400 - bad request' if sort_by query is invalid", () => {
+      return request(app)
+        .get('/api/articles?sort_by=invalidInput')
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('bad request');
+        });
+    });
+
+    it("returns '400 - bad request' if order query is invalid", () => {
+      return request(app)
+        .get('/api/articles?sort_by=topic&order=invalidInput')
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('bad request');
+        });
+    });
+
+    it('filters articles by the topic requested in the query', () => {
+      return request(app)
+        .get('/api/articles?topic=mitch')
+        .expect(200)
+        .then((response) => {
           expect(
-            articles.forEach((article) => {
+            response.body.articles.forEach((article) => {
               expect(article).toEqual(
                 expect.objectContaining({
-                  comment_count: expect.any(String),
+                  topic: 'mitch',
                 })
               );
             })
           );
         });
     });
-    it('the returned comment_count property is correct for an article with multiple comments', () => {
+
+    it("returns '404 - topic doesn't exist' when given an invalid topic query", () => {
       return request(app)
-        .get('/api/articles')
-        .then(({ body: { articles } }) => {
-          expect(articles[0].comment_count).toBe('2');
-        });
-    });
-    it('the value of comment_count is 0 for an article with no comments', () => {
-      return request(app)
-        .get('/api/articles')
-        .then(({ body: { articles } }) => {
-          expect(articles[2].comment_count).toBe('0');
+        .get('/api/articles?topic=invalidTopic')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("topic doesn't exist");
         });
     });
   });
