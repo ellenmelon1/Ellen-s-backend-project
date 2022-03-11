@@ -32,9 +32,15 @@ exports.fetchUsers = () => {
 
 exports.fetchAllArticles = (sort_by = 'created_at', order = 'desc', topic) => {
   if (
-    !['title', 'topic', 'author', 'created_at', 'votes', 'article_id'].includes(
-      sort_by
-    )
+    ![
+      'title',
+      'topic',
+      'author',
+      'created_at',
+      'votes',
+      'article_id',
+      'comment_count',
+    ].includes(sort_by)
   ) {
     return Promise.reject({ status: 400, msg: 'bad request' });
   }
@@ -42,7 +48,7 @@ exports.fetchAllArticles = (sort_by = 'created_at', order = 'desc', topic) => {
     return Promise.reject({ status: 400, msg: 'bad request' });
   }
 
-  let queryString = `SELECT title,topic,author,created_at,votes,article_id FROM articles `;
+  let queryString = `SELECT articles.*, COUNT(comments.article_id) AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id `;
 
   const queryValues = [];
   if (topic) {
@@ -50,7 +56,7 @@ exports.fetchAllArticles = (sort_by = 'created_at', order = 'desc', topic) => {
     queryString += `WHERE topic = $1 `;
   }
 
-  queryString += `ORDER BY ${sort_by} ${order};`;
+  queryString += `GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`;
 
   return db.query(queryString, queryValues).then((articles) => {
     const topic = articles.rows[0];
