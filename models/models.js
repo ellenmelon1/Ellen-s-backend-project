@@ -96,7 +96,7 @@ exports.insertComment = (article_id, requestBody) => {
 exports.fetchArticleComments = (article_id) => {
   return Promise.all([
     db.query(
-      'SELECT comment_id,votes,created_at,author,body FROM comments WHERE article_id = $1;',
+      'SELECT comment_id,votes,created_at,author,body FROM comments WHERE article_id = $1 ORDER BY created_at DESC;',
       [article_id]
     ),
     checkExists('articles', 'article_id', article_id),
