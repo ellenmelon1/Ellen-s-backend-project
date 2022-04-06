@@ -5,7 +5,7 @@ The project is a full stack application inspired by Reddit. It is built upon a R
 Link to the live API: https://ellen-nc-news.herokuapp.com/api
 Link to the backend repo: https://github.com/ellenmelon1/Ellen-s-backend-project
 
-Link to the live frontend:
+Link to the live frontend: https://ellenmelon.netlify.app
 Link to the frontend repo: https://github.com/ellenmelon1/nc-news
 
 # Requirements
