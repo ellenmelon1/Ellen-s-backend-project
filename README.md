@@ -1,22 +1,17 @@
 # Welcome to Northcoders News!
 
-The project is a full stack application inspired by Reddit. It is built upon a RESTful API serving information from the Northcoders News Database. Information pertains to users, articles, comments and topics. The API was built using Postgres SQL and node-postgres.
+The project is a full stack application inspired by Reddit. The REST API uses node-postgres to interact with a PSQL database, and serves information about users, articles, comments and topics. TDD was implemented throughout its construction using Jest and Supertest.
 
 Link to the live API: https://ellen-nc-news.herokuapp.com/api
 Link to the backend repo: https://github.com/ellenmelon1/Ellen-s-backend-project
 
-Link to the live frontend: https://ellenmelon.netlify.app
+Link to the live frontend: https://ellen-nc-news.netlify.app/
 Link to the frontend repo: https://github.com/ellenmelon1/nc-news
 
 # Requirements
 
-- The minimum required version of Node to run this app locally is: v16.13.2
+- Node v16.13.2 or higher
 - Postgres v8.7.3 or higher
-- dotenv v16 or higher
-- NPM v8.1.2 or higher
-- pg-format v1.0.4 or higher
-
-To run the test suite, you will need Jest v27.5.1 or above, Supertest v6.2.2, Jest-extendedv 2.0.0, and Jest-sorted v1.0.14.
 
 # Setup
 
@@ -30,18 +25,11 @@ To run the test suite, use "npm t endpoints.test.js".
 
 # Available Endpoints
 
-GET /api
-GET /api/topics
-GET /api/comments
-GET /api/articles
-GET /api/articles/:article_id
-GET /api/articles/:article_id/comments
-GET /api/users
-GET /api/users/:username
-PATCH /api/comments/:comment_id
-PATCH /api/articles/:article_id
-POST /api/articles
-POST /api/topics
-POST /api/articles/:article_id/comments
-DELETE /api/comments/:comment_id
-DELETE /api/articles/:article_id
+- GET /api
+- GET /api/articles
+- GET /api/articles/:article_id
+- GET /api/articles/:article_id/comments
+- GET /api/users
+- PATCH /api/articles/:article_id
+- POST /api/articles/:article_id/comments
+- DELETE /api/comments/:comment_id
