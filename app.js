@@ -7,6 +7,7 @@ const {
   getUsers,
   getAllArticles,
   updateVotes,
+  updateCommentVotes,
   getArticleComments,
   postComment,
   deleteComment,
@@ -30,6 +31,7 @@ app.get('/api/articles', getAllArticles);
 app.get('/api/articles/:article_id/comments', getArticleComments);
 
 app.patch('/api/articles/:article_id', updateVotes);
+app.patch('/api/comments/:comment_id', updateCommentVotes);
 app.post('/api/articles/:article_id/comments', postComment);
 app.delete('/api/comments/:comment_id', deleteComment);
 
