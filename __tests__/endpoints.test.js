@@ -344,6 +344,62 @@ describe('PATCH requests', () => {
         });
     });
   });
+
+  describe.only('/api/comments/:comment_id', () => {
+    it('responds with the updated comment', () => {
+      return request(app)
+        .patch('/api/comments/1')
+        .send({ inc_votes: 1 })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comment).toEqual({
+            comment_id: 1,
+            body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+            votes: 17,
+            author: 'butter_bridge',
+            article_id: 9,
+            created_at: '2020-04-06T12:17:00.000Z',
+          });
+        });
+    });
+
+    it('increments or decrements votes by the appropriate amount', () => {
+      return request(app)
+        .patch('/api/comments/1')
+        .send({ inc_votes: -1 })
+        .then(({ body }) => {
+          expect(body.comment.votes).toBe(15);
+        });
+    });
+
+    it("responds with '404 - comment doesn't exist', when comment doesn't exist", () => {
+      return request(app)
+        .patch('/api/comments/999')
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('comment does not exist');
+        });
+    });
+    it("responds with '400 - bad request', when invalid comment_id given", () => {
+      return request(app)
+        .patch('/api/comments/invalid-id')
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('bad request');
+        });
+    });
+    it("responds with '400 - bad request', when the request body is missing the required fields", () => {
+      return request(app)
+        .patch('/api/comments/1')
+        .send({})
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('bad request');
+        });
+    });
+  });
 });
 
 describe('POST requests', () => {

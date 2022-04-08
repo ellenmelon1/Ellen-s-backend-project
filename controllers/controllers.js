@@ -4,6 +4,7 @@ const {
   fetchUsers,
   fetchAllArticles,
   patchArticleVotes,
+  patchCommentVotes,
   fetchArticleComments,
   insertComment,
   removeComment,
@@ -52,6 +53,15 @@ exports.updateVotes = (req, res, next) => {
   patchArticleVotes(article_id, req.body)
     .then((article) => {
       res.status(200).send({ article });
+    })
+    .catch(next);
+};
+
+exports.updateCommentVotes = (req, res, next) => {
+  const { comment_id } = req.params;
+  patchCommentVotes(comment_id, req.body)
+    .then((comment) => {
+      res.status(200).send({ comment });
     })
     .catch(next);
 };

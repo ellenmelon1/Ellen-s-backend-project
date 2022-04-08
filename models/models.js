@@ -85,6 +85,24 @@ exports.patchArticleVotes = (article_id, votesToIncrementBy) => {
     });
 };
 
+exports.patchCommentVotes = (comment_id, votesToIncrementBy) => {
+  const votes = votesToIncrementBy.inc_votes;
+  if (typeof votes !== 'number') {
+    return Promise.reject({ status: 400, msg: 'bad request' });
+  }
+  return db
+    .query(
+      'UPDATE comments SET votes = votes + $1 WHERE comment_id = $2 RETURNING *',
+      [votes, comment_id]
+    )
+    .then((comment) => {
+      if (comment.rows.length === 0) {
+        return Promise.reject({ status: 404, msg: 'comment does not exist' });
+      }
+      return comment.rows[0];
+    });
+};
+
 exports.insertComment = (article_id, requestBody) => {
   const username = requestBody.username;
   const body = requestBody.body;
