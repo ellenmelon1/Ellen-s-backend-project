@@ -345,7 +345,7 @@ describe('PATCH requests', () => {
     });
   });
 
-  describe.only('/api/comments/:comment_id', () => {
+  describe('/api/comments/:comment_id', () => {
     it('responds with the updated comment', () => {
       return request(app)
         .patch('/api/comments/1')
