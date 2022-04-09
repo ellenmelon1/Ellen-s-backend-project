@@ -63,7 +63,7 @@ describe('GET requests', () => {
           expect(typeof article).toBe('object');
         });
     });
-    it('the returned object contains the correct properties', () => {
+    it('the returned object contains the correct properties and values', () => {
       const article_id = 1;
       return request(app)
         .get(`/api/articles/${article_id}`)
@@ -282,6 +282,40 @@ describe('GET requests', () => {
         .expect(404)
         .then(({ body: { msg } }) => {
           expect(msg).toBe('not found');
+        });
+    });
+  });
+  describe('/api/comments/:comment_id', () => {
+    it('returns the correct comment object', () => {
+      return request(app)
+        .get(`/api/comments/1`)
+        .then(({ body: { comment } }) => {
+          expect(comment).toEqual(
+            expect.objectContaining({
+              comment_id: 1,
+              body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+              votes: 16,
+              author: 'butter_bridge',
+              article_id: 9,
+              created_at: '2020-04-06T12:17:00.000Z',
+            })
+          );
+        });
+    });
+    it("returns '400 - bad request' when invalid id given", () => {
+      return request(app)
+        .get('/api/comments/invalid_id')
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('bad request');
+        });
+    });
+    it("returns '404 - comment does not exist' when given a valid but non-existent id", () => {
+      return request(app)
+        .get('/api/comments/999')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('comment does not exist');
         });
     });
   });

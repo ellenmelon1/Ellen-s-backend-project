@@ -29,7 +29,9 @@ To run the test suite, use "npm t endpoints.test.js".
 - GET /api/articles
 - GET /api/articles/:article_id
 - GET /api/articles/:article_id/comments
+- GET /api/comments/:comment_id
 - GET /api/users
 - PATCH /api/articles/:article_id
+- PATCH /api/comments/:comment_id
 - POST /api/articles/:article_id/comments
 - DELETE /api/comments/:comment_id

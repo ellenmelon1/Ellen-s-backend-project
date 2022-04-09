@@ -2,6 +2,7 @@ const {
   fetchTopics,
   fetchArticle,
   fetchUsers,
+  fetchComment,
   fetchAllArticles,
   patchArticleVotes,
   patchCommentVotes,
@@ -27,6 +28,15 @@ exports.getArticle = (req, res, next) => {
   fetchArticle(article_id)
     .then((article) => {
       res.status(200).send({ article });
+    })
+    .catch(next);
+};
+
+exports.getComment = (req, res, next) => {
+  const { comment_id } = req.params;
+  fetchComment(comment_id)
+    .then((comment) => {
+      res.status(200).send({ comment });
     })
     .catch(next);
 };
